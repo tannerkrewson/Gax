@@ -1,20 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package GaxClientCMD;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
-import java.util.Spliterators;
 import org.json.JSONObject;
 
-/**
- *
- * @author tanne
- */
 public class client {
 
     static Scanner cmd = new Scanner(System.in);
@@ -22,17 +12,17 @@ public class client {
     public static void main(String args[]) {
         String userInput;
         
-        System.out.println("\n\nGax Client Console1\n");
+        System.out.println("\n\nGax Client Console\n");
         consoleLogin();
         while (true) {
             System.out.println("\nType a command:");
             userInput = getInput();
             if (userInput.equals("help")) {
-                System.out.println("Possible commands: help, ");
+                System.out.println("Possible commands: help, test, play game, exit");
             } else if (userInput.equals("test")) {
-                //System.out.println(sendCommand("test"));
+                System.out.println(sendCommand("test"));
             } else if (userInput.equals("games")) {
-                //System.out.println(sendCommand("games"));
+                System.out.println(sendCommand("games"));
             } else if (userInput.startsWith("play ")) {
                 String game = userInput.substring(5);
                 runGame(game);
@@ -48,6 +38,26 @@ public class client {
         return cmd.nextLine();
     }
 
+    public static String sendCommand(String command) {
+        //legacy?
+        try {
+            Socket socket = new Socket("127.0.0.1", 42924);
+            System.out.println("");
+            PrintStream ps = new PrintStream(socket.getOutputStream());
+            System.out.println("Sending command: " + command);
+            ps.println(command);
+            System.out.println("Command Sent. Waiting for reply...");
+            InputStreamReader ir = new InputStreamReader(socket.getInputStream());
+            BufferedReader br = new BufferedReader(ir);
+            return br.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Send or reply failed");
+        }
+        System.out.println("helptxt");
+        return null;
+    }
+    
     public static JSONObject commandToJSONFromServer(String command) {
         try {
             Socket socket = new Socket("127.0.0.1", 42924);

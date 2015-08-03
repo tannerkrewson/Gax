@@ -3,6 +3,15 @@ apply plugin: 'java'
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'GaxServer.server'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
 // NetBeans will automatically add "run" and "debug" tasks relying on the
 // "mainClass" property. You may however define the property prior executing
 // tasks by passing a "-PmainClass=<QUALIFIED_CLASS_NAME>" argument.

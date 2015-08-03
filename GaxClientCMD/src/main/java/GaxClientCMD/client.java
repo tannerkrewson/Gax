@@ -22,7 +22,7 @@ public class client {
     public static void main(String args[]) {
         String userInput;
         
-        System.out.println("\n\nGax Client Console\n");
+        System.out.println("\n\nGax Client Console1\n");
         consoleLogin();
         while (true) {
             System.out.println("\nType a command:");

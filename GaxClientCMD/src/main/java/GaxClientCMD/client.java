@@ -8,7 +8,7 @@ import org.json.JSONObject;
 public class client {
 
     static Scanner cmd = new Scanner(System.in);
-    static String ip = "192.168.1.150";
+    static String ip = "localhost";
     static int port = 42924;
     
     public static void main(String args[]) {
@@ -54,9 +54,8 @@ public class client {
             return br.readLine();
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Send or reply failed");
+            System.out.println("Legacy send or reply failed");
         }
-        System.out.println("helptxt");
         return null;
     }
     
@@ -77,7 +76,6 @@ public class client {
             e.printStackTrace();
             System.out.println("Send or reply failed");
         }
-        System.out.println("help");
         return null;
     }
 
@@ -131,6 +129,10 @@ public class client {
         System.out.println("Logging in...");
         //sends command to server, receives JSON with appropriate response
         JSONObject jo = commandToJSONFromServer("login " + username + " " + password);
+        if (jo == null){
+            System.out.println("Could not connect to login server.");
+            return false;
+        }
         switch (jo.getInt("success")) {
             //success
             case 1:

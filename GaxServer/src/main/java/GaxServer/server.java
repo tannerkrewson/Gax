@@ -9,6 +9,7 @@ public class server {
     static MongoClient mongoClient;
     static DB gaxDB;
     static Socket socket;
+    static String dbip = "192.168.1.150";
 
     public static void main(String args[]) {
         //starts the console thread
@@ -29,22 +30,8 @@ public class server {
                     //wait for a connection
                     System.out.println("Waiting for connection...");
                     socket = server.accept();
-                    //probably need to put the rest of this in the thread
-                    //create streams
-                    InputStreamReader isr = null;
-                    try {
-                        isr = new InputStreamReader(socket.getInputStream());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    //use the data if it exists
-                    if (isr != null) {
-                        BufferedReader br = new BufferedReader(isr);
-                        //old way
-                        //execCommand(br.readLine());
-                        Runnable r = new serverThread(br.readLine(), mongoClient, gaxDB, socket);
-                        new Thread(r).start();
-                    }
+                    Runnable r = new serverThread(socket, mongoClient, gaxDB);
+                    new Thread(r).start();
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.out.println("Server ended connection");
@@ -52,6 +39,10 @@ public class server {
             }
         } catch (IOException e) {
             System.out.println("293786");
+            if (e.getMessage().startsWith("Address already in use")) {
+                System.out.println("Server is already running!");
+                System.exit(0);
+            }
             e.printStackTrace();
         }
     }
@@ -59,7 +50,7 @@ public class server {
     public static boolean refreshDatabases() {
         System.out.println("Refreshing databases...");
         try {
-            mongoClient = new MongoClient("localhost");
+            mongoClient = new MongoClient(dbip);
             gaxDB = mongoClient.getDB("gax");
             try {
                 if (gaxDB.collectionExists("games")) {

@@ -1,5 +1,6 @@
 package GaxServer;
 
+import static GaxServer.server.socket;
 import com.mongodb.*;
 import com.mongodb.util.JSON;
 import java.io.*;
@@ -8,13 +9,11 @@ import org.json.JSONObject;
 
 public class serverThread implements Runnable {
 
-    String received;
     MongoClient mongoClient;
     DB gaxDB;
     Socket socket;
 
-    public serverThread(String c, MongoClient mc, DB db, Socket s) {
-        received = c;
+    public serverThread(Socket s, MongoClient mc, DB db) {
         mongoClient = mc;
         gaxDB = db;
         socket = s;
@@ -22,6 +21,21 @@ public class serverThread implements Runnable {
 
     @Override
     public void run() {
+        //create streams
+        InputStreamReader isr = null;
+        try {
+            isr = new InputStreamReader(socket.getInputStream());
+            //use the data if it exists
+            if (isr != null) {
+                BufferedReader br = new BufferedReader(isr);
+                execCommand(br.readLine());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void execCommand(String received) {
         //execute command from client
         if (received.equals("test")) {
             clientDataSender("Test received!");

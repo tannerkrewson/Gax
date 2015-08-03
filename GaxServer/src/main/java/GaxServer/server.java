@@ -24,17 +24,15 @@ public class server {
                 return;
             }
             ServerSocket server = new ServerSocket(42924);
-            //all this shit needs to be in its own thread
             while (true) {
                 try {
                     //wait for a connection
                     System.out.println("Waiting for connection...");
                     socket = server.accept();
-                    System.out.println("hi");
+                    //probably need to put the rest of this in the thread
                     //create streams
                     InputStreamReader isr = null;
                     try {
-                        //waits for command here?
                         isr = new InputStreamReader(socket.getInputStream());
                     } catch (IOException e) {
                         e.printStackTrace();

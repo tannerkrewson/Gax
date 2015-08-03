@@ -8,7 +8,9 @@ import org.json.JSONObject;
 public class client {
 
     static Scanner cmd = new Scanner(System.in);
-
+    static String ip = "192.168.1.150";
+    static int port = 42924;
+    
     public static void main(String args[]) {
         String userInput;
         
@@ -41,7 +43,7 @@ public class client {
     public static String sendCommand(String command) {
         //legacy?
         try {
-            Socket socket = new Socket("127.0.0.1", 42924);
+            Socket socket = new Socket(ip, port);
             System.out.println("");
             PrintStream ps = new PrintStream(socket.getOutputStream());
             System.out.println("Sending command: " + command);
@@ -60,7 +62,7 @@ public class client {
     
     public static JSONObject commandToJSONFromServer(String command) {
         try {
-            Socket socket = new Socket("127.0.0.1", 42924);
+            Socket socket = new Socket(ip, port);
             System.out.println("");
             PrintStream ps = new PrintStream(socket.getOutputStream());
             System.out.println("Sending command: " + command);

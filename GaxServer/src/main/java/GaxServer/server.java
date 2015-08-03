@@ -11,6 +11,9 @@ public class server {
     static Socket socket;
 
     public static void main(String args[]) {
+        //starts the console thread
+        Runnable ct = new consoleThread();
+        new Thread(ct).start();
         try {
             System.out.println("Gax Server \n");
             System.out.println("Starting up...");

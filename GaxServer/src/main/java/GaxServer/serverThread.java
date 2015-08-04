@@ -38,16 +38,16 @@ public class serverThread implements Runnable {
     public void execJSONCommand(String JSON) {
         //convert unformatted string with the JSON to JSONOBject
         JSONObject jo = new JSONObject(JSON);
-        
+
         //extract the command
         String received = jo.getString("command");
-        
+
         //skip validation for commands that can be executed without a valid session
         if (!received.startsWith("login ") && !received.startsWith("register ")) {
-            
+
             //check to see if our client has a valid session
             boolean vs = checkValidSession(jo);
-            
+
             //if they don't then we tell them, otherwise execute the requested command
             if (vs == false) {
                 //tell the client that it needs to relogin
@@ -60,7 +60,7 @@ public class serverThread implements Runnable {
                 return;
             }
         }
-        
+
         //execute command from client
         if (received.equals("test")) {
             clientDataSender("Test received!");
@@ -180,9 +180,13 @@ public class serverThread implements Runnable {
         String listOfGames = "";
         while (cursor.hasNext()) {
             JSONObject json = new JSONObject(JSON.serialize(cursor.next()));
-            listOfGames += json.getString("game") + ", ";
+            listOfGames += json.getString("game") + "\n";
         }
-        return listOfGames.substring(0, listOfGames.length() - 1);
+        JSONObject jo = new JSONObject();
+        jo.put("responseToCommand", "games");
+        jo.put("success", true);
+        jo.put("games", listOfGames);
+        return jo.toString();
     }
 
     public String dboToString(DBObject dbo, String item) {

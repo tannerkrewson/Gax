@@ -23,11 +23,13 @@ public class client {
             System.out.println("\nType a command:");
             userInput = getInput();
             if (userInput.equals("help")) {
-                System.out.println("Possible commands: help, test, play game, exit");
+                System.out.println("Possible commands: help, games, play game, exit");
             } else if (userInput.equals("test")) {
                 //System.out.println(sendCommand("test"));
             } else if (userInput.equals("games")) {
-                //System.out.println(sendCommand("games"));
+                String temp = sendCommand("games").getString("games");
+                System.out.println("\nGax Game Catalog:");
+                System.out.println(temp);
             } else if (userInput.startsWith("play ")) {
                 String game = userInput.substring(5);
                 runGame(game);
@@ -42,27 +44,8 @@ public class client {
     public static String getInput() {
         return cmd.nextLine();
     }
-    /*
-     public static String sendCommand(String command) {
-     //legacy
-     try {
-     Socket socket = new Socket(ip, port);
-     System.out.println("");
-     PrintStream ps = new PrintStream(socket.getOutputStream());
-     System.out.println("Sending command: " + command);
-     ps.println(command);
-     System.out.println("Command Sent. Waiting for reply...");
-     InputStreamReader ir = new InputStreamReader(socket.getInputStream());
-     BufferedReader br = new BufferedReader(ir);
-     return br.readLine();
-     } catch (Exception e) {
-     e.printStackTrace();
-     System.out.println("Legacy send or reply failed");
-     }
-     return null;
-     }*/
 
-    public static JSONObject commandToJSONFromServer(String command) {
+    public static JSONObject sendCommand(String command) {
         try {
             //gets text command, sends json, receives & returns json
             Socket socket = new Socket(ip, port);
@@ -107,7 +90,7 @@ public class client {
     public static void runGame(String game) {
         System.out.println("Opening " + game);
         //sends command to server, receives JSON with appropriate response
-        JSONObject jo = commandToJSONFromServer("getPath " + game);
+        JSONObject jo = sendCommand("getPath " + game);
         if (jo == null) {
             //read comments in commandToJSONFromServer for what this is
             return;
@@ -125,6 +108,8 @@ public class client {
             if (u.equals("register")) {
                 consoleRegister();
                 return;
+            } else if (u.equals("exit")) {
+                System.exit(0);
             }
             System.out.println("Password:");
             String p = getInput();
@@ -154,7 +139,7 @@ public class client {
         }
         System.out.println("Logging in...");
         //sends command to server, receives JSON with appropriate response
-        JSONObject jo = commandToJSONFromServer("login " + username + " " + password);
+        JSONObject jo = sendCommand("login " + username + " " + password);
         if (jo == null) {
             //read comments in commandToJSONFromServer for what this is
             //returning false will loop consoleLogin
@@ -175,7 +160,7 @@ public class client {
         }
         System.out.println("Registering...");
         //sends command to server, receives JSON with appropriate response
-        JSONObject jo = commandToJSONFromServer("register " + username + " " + password);
+        JSONObject jo = sendCommand("register " + username + " " + password);
         if (jo == null) {
             //read comments in commandToJSONFromServer for what this is
             //returning false will loop consoleLogin

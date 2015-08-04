@@ -1,6 +1,5 @@
 package GaxServer;
 
-import static GaxServer.server.socket;
 import com.mongodb.*;
 import com.mongodb.util.JSON;
 import java.io.*;
@@ -12,6 +11,7 @@ public class serverThread implements Runnable {
     MongoClient mongoClient;
     DB gaxDB;
     Socket socket;
+    sessionManager sManager = new sessionManager();
 
     public serverThread(Socket s, MongoClient mc, DB db) {
         mongoClient = mc;
@@ -28,14 +28,39 @@ public class serverThread implements Runnable {
             //use the data if it exists
             if (isr != null) {
                 BufferedReader br = new BufferedReader(isr);
-                execCommand(br.readLine());
+                execJSONCommand(br.readLine());
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void execCommand(String received) {
+    public void execJSONCommand(String JSON) {
+        //convert unformatted string with the JSON to JSONOBject
+        JSONObject jo = new JSONObject(JSON);
+        
+        //extract the command
+        String received = jo.getString("command");
+        
+        //skip validation for commands that can be executed without a valid session
+        if (!received.startsWith("login ") && !received.startsWith("register ")) {
+            
+            //check to see if our client has a valid session
+            boolean vs = checkValidSession(jo);
+            
+            //if they don't then we tell them, otherwise execute the requested command
+            if (vs == false) {
+                //tell the client that it needs to relogin
+                JSONObject sjo = new JSONObject();
+                sjo.put("responseToCommand", received);
+                sjo.put("success", false);
+                sjo.put("reason", 1);
+                //send it out
+                clientDataSender(sjo.toString());
+                return;
+            }
+        }
+        
         //execute command from client
         if (received.equals("test")) {
             clientDataSender("Test received!");
@@ -50,6 +75,19 @@ public class serverThread implements Runnable {
             clientDataSender(getPath(game));
         } else {
             System.out.println("Unknown client command: " + received);
+        }
+    }
+
+    public boolean checkValidSession(JSONObject jo) {
+        //watch out, it could be null!!
+        String username = jo.getString("username");
+        String sessionID = jo.getString("sessionID");
+        if (sManager.checkSession(gaxDB, username, sessionID)) {
+            System.out.println("Session ID " + sessionID + " for " + username + " is valid!");
+            return true;
+        } else {
+            System.out.println("Session ID " + sessionID + " for " + username + " is invalid!");
+            return false;
         }
     }
 
@@ -79,7 +117,7 @@ public class serverThread implements Runnable {
             //create JSON to be sent
             JSONObject jo = new JSONObject();
             jo.put("responseToCommand", "register");
-            jo.put("success", 0);
+            jo.put("success", false);
             jo.put("error", e.getMessage());
             return jo.toString();
         }
@@ -94,17 +132,21 @@ public class serverThread implements Runnable {
             DBObject dbo = cursor.next();
             String dbItem = dboToString(dbo, "username");
             if (username.equals(dbItem) && password.equals(dboToString(dbo, "password"))) {
+                //register a session id                
+                String cip = socket.getLocalSocketAddress().toString();
+                String sid = sManager.newSession(gaxDB, username, cip);
                 //create JSON to be sent
                 JSONObject jo = new JSONObject();
                 jo.put("responseToCommand", "login");
-                jo.put("success", 1);
-                //send a session id or seomthing?
+                jo.put("sessionID", sid);
+                jo.put("success", true);
                 return jo.toString();
             }
         }
         JSONObject jo = new JSONObject();
         jo.put("responseToCommand", "login");
-        jo.put("success", 0);
+        jo.put("success", false);
+        jo.put("reason", 2);
         return jo.toString();
     }
 
@@ -147,4 +189,12 @@ public class serverThread implements Runnable {
         JSONObject json = new JSONObject(JSON.serialize(dbo));
         return json.getString(item);
     }
+    /*
+     public static JSONObject baseJSON() {
+     //makes a json object with the stuff that will be sent with every command
+     JSONObject jo = new JSONObject();
+     jo.put("s", curUser);
+     jo.put("sessionID", sessionID);
+     return jo;
+     }*/
 }

@@ -127,10 +127,14 @@ public class serverThread implements Runnable {
         while (cursor.hasNext()) {
             DBObject dbo = cursor.next();
             String dbItem = dboToString(dbo, "username");
+
+            //if the username and password match, we're good to go
             if (username.equals(dbItem) && password.equals(dboToString(dbo, "password"))) {
+
                 //register a session id                
                 String cip = socket.getLocalSocketAddress().toString();
                 String sid = sManager.newSession(server.gaxDB, username, cip);
+
                 //create JSON to be sent
                 JSONObject jo = new JSONObject();
                 jo.put("responseToCommand", "login");

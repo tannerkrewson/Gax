@@ -8,14 +8,10 @@ import org.json.JSONObject;
 
 public class serverThread implements Runnable {
 
-    MongoClient mongoClient;
-    DB gaxDB;
     Socket socket;
     sessionManager sManager = new sessionManager();
 
-    public serverThread(Socket s, MongoClient mc, DB db) {
-        mongoClient = mc;
-        gaxDB = db;
+    public serverThread(Socket s) {
         socket = s;
     }
 
@@ -82,7 +78,7 @@ public class serverThread implements Runnable {
         //watch out, it could be null!!
         String username = jo.getString("username");
         String sessionID = jo.getString("sessionID");
-        if (sManager.checkSession(gaxDB, username, sessionID)) {
+        if (sManager.checkSession(server.gaxDB, username, sessionID)) {
             System.out.println("Session ID " + sessionID + " for " + username + " is valid!");
             return true;
         } else {
@@ -107,7 +103,7 @@ public class serverThread implements Runnable {
             BasicDBObject document = new BasicDBObject();
             document.put("username", username);
             document.put("password", password);
-            gaxDB.getCollection("login").insert(document);
+            server.gaxDB.getCollection("login").insert(document);
             //create JSON to be sent
             JSONObject jo = new JSONObject();
             jo.put("responseToCommand", "register");
@@ -125,7 +121,7 @@ public class serverThread implements Runnable {
 
     public String login(String username, String password) {
         System.out.println("Logging in " + username);
-        DBCursor cursor = gaxDB.getCollection("login").find();
+        DBCursor cursor = server.gaxDB.getCollection("login").find();
         //while there is another game in the collection, continue checking
         //next() returns a value and advances itself when called
         while (cursor.hasNext()) {
@@ -134,7 +130,7 @@ public class serverThread implements Runnable {
             if (username.equals(dbItem) && password.equals(dboToString(dbo, "password"))) {
                 //register a session id                
                 String cip = socket.getLocalSocketAddress().toString();
-                String sid = sManager.newSession(gaxDB, username, cip);
+                String sid = sManager.newSession(server.gaxDB, username, cip);
                 //create JSON to be sent
                 JSONObject jo = new JSONObject();
                 jo.put("responseToCommand", "login");
@@ -152,12 +148,12 @@ public class serverThread implements Runnable {
 
     public String getPath(String game) {
         System.out.println("Finding the path of " + game);
-        DBCursor cursor = gaxDB.getCollection("games").find();
+        DBCursor cursor = server.gaxDB.getCollection("games").find();
         //while there is another game in the collection, continue checking
         //next() returns a value and advances itself when called
         while (cursor.hasNext()) {
             DBObject dbo = cursor.next();
-            String dbItem = dboToString(dbo, "game");
+            String dbItem = dboToString(dbo, "name");
             if (game.equals(dbItem)) {
                 String path = dboToString(dbo, "path");
                 System.out.println("Path found: " + path);
@@ -176,11 +172,10 @@ public class serverThread implements Runnable {
     }
 
     public String listGames() {
-        DBCursor cursor = gaxDB.getCollection("games").find();
+        String[][] gl = serverMemory.gamesList();
         String listOfGames = "";
-        while (cursor.hasNext()) {
-            JSONObject json = new JSONObject(JSON.serialize(cursor.next()));
-            listOfGames += json.getString("game") + "\n";
+        for (int i = 0; i < gl.length; i++) {
+            listOfGames += gl[i][0] + "," + gl[i][1] + "\n";
         }
         JSONObject jo = new JSONObject();
         jo.put("responseToCommand", "games");

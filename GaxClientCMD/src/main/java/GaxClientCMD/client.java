@@ -2,7 +2,6 @@ package GaxClientCMD;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.file.attribute.AclEntryPermission;
 import java.util.Scanner;
 import org.json.JSONObject;
 
@@ -28,7 +27,7 @@ public class client {
                 //System.out.println(sendCommand("test"));
             } else if (userInput.equals("games")) {
                 String temp = sendCommand("games").getString("games");
-                System.out.println("\nGax Game Catalog:");
+                System.out.println("\nGax Game Catalog (gid, name):");
                 System.out.println(temp);
             } else if (userInput.startsWith("play ")) {
                 String game = userInput.substring(5);

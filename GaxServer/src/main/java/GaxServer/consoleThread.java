@@ -2,10 +2,10 @@ package GaxServer;
 
 import java.util.Scanner;
 
-public class consoleThread implements Runnable{
+public class consoleThread implements Runnable {
 
     static Scanner cmd = new Scanner(System.in);
-    
+
     @Override
     public void run() {
         String userInput;
@@ -14,6 +14,8 @@ public class consoleThread implements Runnable{
             userInput = cmd.nextLine();
             if (userInput.equals("help")) {
                 System.out.println("Possible commands: exit");
+            } else if (userInput.equals("loadAll")) {
+                serverMemory.loadAll();
             } else if (userInput.equals("exit")) {
                 System.exit(0);
             } else {
@@ -21,5 +23,5 @@ public class consoleThread implements Runnable{
             }
         }
     }
-    
+
 }

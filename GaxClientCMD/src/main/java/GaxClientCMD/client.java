@@ -40,7 +40,7 @@ public class client {
         }
     }
 
-    public static String getInput() {
+    private static String getInput() {
         return cmd.nextLine();
     }
 

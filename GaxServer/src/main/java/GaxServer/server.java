@@ -31,10 +31,13 @@ public class server {
             ServerSocket server = new ServerSocket(42924);
             while (true) {
                 try {
-                    //wait for a connection
+                    //wait for a connection on server.accept
                     System.out.println("Waiting for connection...");
                     Runnable r = new serverThread(server.accept());
+
+                    //make a new thread for the socket
                     new Thread(r).start();
+
                 } catch (Exception e) {
                     e.printStackTrace(System.out);
                     System.out.println("Server ended connection");

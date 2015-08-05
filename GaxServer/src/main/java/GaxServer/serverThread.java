@@ -21,11 +21,9 @@ public class serverThread implements Runnable {
         InputStreamReader isr = null;
         try {
             isr = new InputStreamReader(socket.getInputStream());
-            //use the data if it exists
-            if (isr != null) {
-                BufferedReader br = new BufferedReader(isr);
-                execJSONCommand(br.readLine());
-            }
+            BufferedReader br = new BufferedReader(isr);
+            execJSONCommand(br.readLine());
+            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

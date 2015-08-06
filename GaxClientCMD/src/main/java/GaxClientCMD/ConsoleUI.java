@@ -29,6 +29,7 @@ public class ConsoleUI {
             GaxClient.runGame(game);
         } else if (userInput.equals("exit")) {
             System.out.println("Closing Gax Client");
+            System.exit(0);
         } else {
             System.out.println("Invalid command: " + userInput);
         }

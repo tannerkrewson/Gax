@@ -1,6 +1,7 @@
 package GaxClientCMD;
 
 import java.util.Scanner;
+import java.util.Spliterators;
 
 public class ConsoleUI {
 
@@ -27,11 +28,25 @@ public class ConsoleUI {
         } else if (userInput.startsWith("play ")) {
             String game = userInput.substring(5);
             GaxClient.runGame(game);
+        /*} else if (userInput.equals("memtest")) {
+            GaxClient.cm.writeNewConfig();*/
         } else if (userInput.equals("exit")) {
             System.out.println("Closing Gax Client");
             System.exit(0);
         } else {
             System.out.println("Invalid command: " + userInput);
+        }
+    }
+
+    public boolean askYNQuestion(String question) {
+        while (true) {
+            System.out.println(question + " (Y/N)");
+            String response = cmd.nextLine().toUpperCase().trim();
+            if (response.equals("Y")) {
+                return true;
+            } else if (response.equals("N")) {
+                return false;
+            }
         }
     }
 
@@ -51,6 +66,18 @@ public class ConsoleUI {
             System.out.println("Password:");
             String p = cmd.nextLine();
             loginSuccess = GaxClient.gs.sendLogin(u, p);
+        }
+        
+        //I put this here because consoleLogin is also called if the session id
+        //that is stored in GaxClient.gs is not valid, otherwise i would have
+        //put it with next to the consoleLogin call at startup
+        consoleSaveID();
+    }
+
+    public void consoleSaveID() {
+        boolean su = askYNQuestion("Would you like to save your session?");
+        if (su) {
+            GaxClient.cm.writeCurConfig();
         }
     }
 

@@ -2,7 +2,6 @@ package GaxClientCMD;
 
 import java.io.*;
 import java.net.Socket;
-import java.sql.*;
 import org.json.JSONObject;
 
 public class GaxClient {
@@ -13,12 +12,21 @@ public class GaxClient {
 
     static GaxSession gs = new GaxSession();
     static ConsoleUI cui = new ConsoleUI();
+    static ClientMemory cm = new ClientMemory();
 
     public static void main(String args[]) {
+        //console startup
         cui.startup();
 
-        //this will loop until the user has logged in
-        cui.consoleLogin();
+        //if the config file exists, it will use the uname and session id
+        //from that and skip login
+        //in its current state, it will not validate until after the first 
+        //command is sent to the server by the client
+        boolean al = cm.getSavedConfig();
+        if (!al) {
+            //this will loop until the user has logged in
+            cui.consoleLogin();
+        }
 
         //this will use this class's sendCommand method
         while (true) {

@@ -25,7 +25,7 @@ public class GaxSession {
         sessionID = jo.getString("sessionID");
         curUser = username;
         System.out.println("Your session ID is " + sessionID);
-        System.out.println("You are now logged in as " + username + "!");
+        System.out.println("You are now logged in as " + username + "!\n");
         return true;
     }
 

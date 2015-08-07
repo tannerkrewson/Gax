@@ -8,6 +8,7 @@ import com.mongodb.DBObject;
 import java.util.Date;
 import com.mongodb.util.JSON;
 import java.util.Random;
+import java.util.UUID;
 import org.json.JSONObject;
 
 public class sessionManager {
@@ -65,10 +66,7 @@ public class sessionManager {
     }
 
     public static String generateID() {
-        Random rand = new Random();
-        String id = Integer.toString(rand.nextInt(2000000));
-        //don't mind the insanity
-        //String id = String.valueOf((Double.parseDouble(IP.replaceAll("[^\\d]", ""))) * 31 / 2 - 69).replaceAll("[^\\d]", "");
+        String id = UUID.randomUUID().toString().replaceAll("-", "");
         return id;
     }
 

@@ -2,6 +2,7 @@ package GaxClientCMD;
 
 import java.io.*;
 import org.json.JSONObject;
+import org.zeroturnaround.zip.ZipUtil;
 
 public class GameDownloader {
 
@@ -9,10 +10,10 @@ public class GameDownloader {
 
         //first tell the server what we about to throw down
         JSONObject jo = GaxClient.sendCommand("download " + gid);
-        
+
         //check if the game exists and if the server is ready to send to us
         boolean success = jo.getBoolean("success");
-        if (!success){
+        if (!success) {
             System.out.println("Download game failed: Error code " + jo.getInt("reason"));
             return false;
         }
@@ -64,6 +65,19 @@ public class GameDownloader {
                 return false;
             }
         }
+        return true;
+    }
+
+    public boolean installGame(int gid) {
+
+        //we need to check if it exists before we unzip
+        System.out.println("Installing game " + gid);
+        String outputFolder = GaxClient.cm.ConfigDir + "GaxGames\\" + gid + "\\";
+        String zipFile = outputFolder + gid + ".zip";
+   
+        ZipUtil.unpack(new File(zipFile), new File(outputFolder));
+
+        System.out.println("Finished installing game " + gid);
         return true;
     }
 }

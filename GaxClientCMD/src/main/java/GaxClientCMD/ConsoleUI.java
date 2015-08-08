@@ -28,7 +28,11 @@ public class ConsoleUI {
             String game = userInput.substring(5);
             GaxClient.runGame(game);
         } else if (userInput.startsWith("download ")){
-            boolean abc = GaxClient.gd.downloadGame(Integer.parseInt(userInput.substring(9)));
+            int gid = Integer.parseInt(userInput.substring(9));
+            boolean abc = GaxClient.gd.downloadGame(gid);
+            if (abc){
+                boolean def = GaxClient.gd.installGame(gid);
+            }
         } else if (userInput.equals("exit")) {
             System.out.println("Closing Gax Client");
             System.exit(0);

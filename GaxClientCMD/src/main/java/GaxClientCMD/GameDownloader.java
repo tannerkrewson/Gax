@@ -9,10 +9,17 @@ public class GameDownloader {
 
         //first tell the server what we about to throw down
         JSONObject jo = GaxClient.sendCommand("download " + gid);
+        
+        //check if the game exists and if the server is ready to send to us
+        boolean success = jo.getBoolean("success");
+        if (!success){
+            System.out.println("Download game failed: Error code " + jo.getInt("reason"));
+            return false;
+        }
 
         //installation directory
-        String sdir = GaxClient.cm.ConfigDir + jo.getString("path");
-        String sfile = jo.getString("filename");
+        String sdir = GaxClient.cm.ConfigDir + "GaxGames/" + gid + "/";
+        String sfile = gid + ".zip";
 
         byte[] aByte = new byte[1];
         int bytesRead;
@@ -23,6 +30,7 @@ public class GameDownloader {
             is = GaxClient.socket.getInputStream();
         } catch (IOException ex) {
             ex.printStackTrace();
+            return false;
         }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -53,6 +61,7 @@ public class GameDownloader {
                 bos.close();
             } catch (IOException ex) {
                 ex.printStackTrace();
+                return false;
             }
         }
         return true;

@@ -1,5 +1,7 @@
 package GaxServer;
 
+import com.mongodb.DBCursor;
+import com.mongodb.util.JSON;
 import java.io.*;
 import java.net.Socket;
 import org.json.JSONObject;
@@ -15,20 +17,42 @@ public class DownloadServer {
     }
 
     public void sendGame(int gid) {
+        /*  Current assumed format is GaxGames/gid/gid.zip  */
+
         //tell the client what it's getting itself into
         JSONObject njo = new JSONObject();
-        njo.put("responseToCommand", "download " + gid);
-        njo.put("success", true);
-        System.out.println("//" + gid + "//");
-        njo.put("path", "//" + gid + "//");
-        njo.put("filename", "game.zip");
-        st.clientDataSender(njo);
+        if (gameExists(gid)) {
+            //if the game exists, the client will get ready to receive
+            njo.put("responseToCommand", "download " + gid);
+            njo.put("success", true);
+            st.clientDataSender(njo);
+        } else {
+            njo.put("responseToCommand", "download " + gid);
+            njo.put("success", false);
+            njo.put("reason", 2);
+            st.clientDataSender(njo);
+            return;
+        }
 
         System.out.println("Sending game " + gid + " to client.");
-        sendFile("game.zip");
+        sendFile("GaxGames/" + gid + "/" + gid + ".zip");
+    }
+
+    private boolean gameExists(int gid) {
+        DBCursor cursor = server.gaxDB.getCollection("games").find();
+        while (cursor.hasNext()) {
+            JSONObject json = new JSONObject(JSON.serialize(cursor.next()));
+
+            //if the gid passes matches the one in the db
+            if (json.getInt("gid") == gid) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void sendFile(String path) {
+        System.out.println("Sending " + path);
         BufferedOutputStream outToClient = null;
         try {
             outToClient = new BufferedOutputStream(socket.getOutputStream());

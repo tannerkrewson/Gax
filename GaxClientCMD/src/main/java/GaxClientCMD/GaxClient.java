@@ -2,8 +2,6 @@ package GaxClientCMD;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.JSONObject;
 
 public class GaxClient {

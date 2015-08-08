@@ -22,10 +22,15 @@ public class GaxClient {
         //from that and skip login
         //in its current state, it will not validate until after the first 
         //command is sent to the server by the client
-        boolean al = cm.getSavedConfig();
-        if (!al) {
+        boolean success = cm.getSavedConfig();
+        if (!success) {
             //this will loop until the user has logged in
             cui.consoleLogin();
+        } else if (success){
+            //check if the saved session id is still valid
+            //the command name doesn't matter, it's just
+            //going to check the session id
+            sendCommand("void");
         }
 
         //this will use this class's sendCommand method

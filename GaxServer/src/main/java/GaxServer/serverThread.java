@@ -22,17 +22,19 @@ public class serverThread implements Runnable {
         try {
             isr = new InputStreamReader(socket.getInputStream());
             BufferedReader br = new BufferedReader(isr);
-            execJSONCommand(br.readLine());
+
+            //converts received string to JSONObject and passes it along
+            execJSONCommand(new JSONObject(br.readLine()));
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void execJSONCommand(String JSON) {
-        //convert unformatted string with the JSON to JSONOBject
-        JSONObject jo = new JSONObject(JSON);
-
+    //get the command from the client
+    //validate the client's session
+    //execute the command
+    public void execJSONCommand(JSONObject jo) {
         //extract the command
         String received = jo.getString("command");
 
@@ -50,14 +52,13 @@ public class serverThread implements Runnable {
                 sjo.put("success", false);
                 sjo.put("reason", 1);
                 //send it out
-                clientDataSender(sjo.toString());
+                clientDataSender(sjo);
                 return;
             }
         }
-
         //execute command from client
-        if (received.equals("test")) {
-            clientDataSender("Test received!");
+        if (received.startsWith("test ")) {
+
         } else if (received.startsWith("login ")) {
             clientDataSender(login(received.split(" ")[1], received.split(" ")[2]));
         } else if (received.startsWith("register ")) {
@@ -85,18 +86,19 @@ public class serverThread implements Runnable {
         }
     }
 
-    public void clientDataSender(String toSend) {
+    public void clientDataSender(JSONObject toSend) {
         try {
+            String cmd = toSend.toString();
             PrintStream ps = new PrintStream(socket.getOutputStream());
-            System.out.println("Sending: " + toSend);
-            ps.println(toSend + "\n");
+            System.out.println("Sending: " + cmd);
+            ps.println(cmd + "\n");
         } catch (Exception e) {
             System.out.println("Error sending data");
         }
 
     }
 
-    public String register(String username, String password) {
+    public JSONObject register(String username, String password) {
         try {
             BasicDBObject document = new BasicDBObject();
             document.put("username", username);
@@ -106,18 +108,18 @@ public class serverThread implements Runnable {
             JSONObject jo = new JSONObject();
             jo.put("responseToCommand", "register");
             jo.put("success", 1);
-            return jo.toString();
+            return jo;
         } catch (Exception e) {
             //create JSON to be sent
             JSONObject jo = new JSONObject();
             jo.put("responseToCommand", "register");
             jo.put("success", false);
             jo.put("error", e.getMessage());
-            return jo.toString();
+            return jo;
         }
     }
 
-    public String login(String username, String password) {
+    public JSONObject login(String username, String password) {
         System.out.println("Logging in " + username);
         DBCursor cursor = server.gaxDB.getCollection("login").find();
         //while there is another game in the collection, continue checking
@@ -138,17 +140,17 @@ public class serverThread implements Runnable {
                 jo.put("responseToCommand", "login");
                 jo.put("sessionID", sid);
                 jo.put("success", true);
-                return jo.toString();
+                return jo;
             }
         }
         JSONObject jo = new JSONObject();
         jo.put("responseToCommand", "login");
         jo.put("success", false);
         jo.put("reason", 2);
-        return jo.toString();
+        return jo;
     }
 
-    public String getPath(String game) {
+    public JSONObject getPath(String game) {
         System.out.println("Finding the path of " + game);
         DBCursor cursor = server.gaxDB.getCollection("games").find();
         //while there is another game in the collection, continue checking
@@ -164,16 +166,16 @@ public class serverThread implements Runnable {
                 jo.put("responseToCommand", "getPath");
                 jo.put("success", true);
                 jo.put("path", path);
-                return jo.toString();
+                return jo;
             }
         }
         JSONObject jo = new JSONObject();
         jo.put("responseToCommand", "getPath");
         jo.put("success", false);
-        return jo.toString();
+        return jo;
     }
 
-    public String listGames() {
+    public JSONObject listGames() {
         String[][] gl = serverMemory.gamesList();
         String listOfGames = "";
         for (int i = 0; i < gl.length; i++) {
@@ -183,7 +185,7 @@ public class serverThread implements Runnable {
         jo.put("responseToCommand", "games");
         jo.put("success", true);
         jo.put("games", listOfGames);
-        return jo.toString();
+        return jo;
     }
 
     public String dboToString(DBObject dbo, String item) {

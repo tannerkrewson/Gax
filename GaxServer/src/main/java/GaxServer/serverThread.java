@@ -10,6 +10,7 @@ public class serverThread implements Runnable {
 
     Socket socket;
     sessionManager sManager = new sessionManager();
+    DownloadServer ds;
 
     public serverThread(Socket s) {
         socket = s;
@@ -22,9 +23,10 @@ public class serverThread implements Runnable {
         try {
             isr = new InputStreamReader(socket.getInputStream());
             BufferedReader br = new BufferedReader(isr);
-
             //converts received string to JSONObject and passes it along
             execJSONCommand(new JSONObject(br.readLine()));
+            isr.close();
+            br.close();
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -68,8 +70,18 @@ public class serverThread implements Runnable {
         } else if (received.startsWith("getPath ")) {
             String game = received.substring(8);
             clientDataSender(getPath(game));
+        } else if (received.startsWith("download ")) {
+            String gid = received.substring(9);
+            
+            ds = new DownloadServer(socket, this);
+            ds.sendGame(Integer.parseInt(gid));
         } else {
             System.out.println("Unknown client command: " + received);
+            JSONObject njo = new JSONObject();
+            njo.put("responseToCommand", received);
+            njo.put("success", false);
+            njo.put("reason", 2);
+            clientDataSender(njo);
         }
     }
 
@@ -192,6 +204,7 @@ public class serverThread implements Runnable {
         JSONObject json = new JSONObject(JSON.serialize(dbo));
         return json.getString(item);
     }
+
     /*
      public static JSONObject baseJSON() {
      //makes a json object with the stuff that will be sent with every command

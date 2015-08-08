@@ -1,7 +1,6 @@
 package GaxClientCMD;
 
 import java.util.Scanner;
-import java.util.Spliterators;
 
 public class ConsoleUI {
 
@@ -28,8 +27,9 @@ public class ConsoleUI {
         } else if (userInput.startsWith("play ")) {
             String game = userInput.substring(5);
             GaxClient.runGame(game);
-        /*} else if (userInput.equals("memtest")) {
-            GaxClient.cm.writeNewConfig();*/
+        } else if (userInput.startsWith("download ")){
+            //String gid = userInput.substring(9);
+            boolean abc = GaxClient.gd.downloadGame(10);
         } else if (userInput.equals("exit")) {
             System.out.println("Closing Gax Client");
             System.exit(0);

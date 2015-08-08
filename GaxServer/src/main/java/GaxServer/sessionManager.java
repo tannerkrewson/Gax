@@ -56,7 +56,6 @@ public class sessionManager {
             //if the username matches and the sessionid matches
             //we'll add a more complicated check, like timebomb, eventually
             if (username.equals(dbItem) && sessionid.equals(dboToString(dbo, "sessionID"))) {
-                System.out.println("Session is good!");
                 return true;
             }
             //if theyre not equal, prompt login

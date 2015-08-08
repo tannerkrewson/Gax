@@ -2,6 +2,8 @@ package GaxClientCMD;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONObject;
 
 public class GaxClient {
@@ -9,10 +11,13 @@ public class GaxClient {
     //ip and port of the server
     static String ip = "localhost";
     static int port = 42924;
+    
+    static Socket socket;
 
     static GaxSession gs = new GaxSession();
     static ConsoleUI cui = new ConsoleUI();
     static ClientMemory cm = new ClientMemory();
+    static GameDownloader gd = new GameDownloader();
 
     public static void main(String args[]) {
         //console startup
@@ -26,7 +31,7 @@ public class GaxClient {
         if (!success) {
             //this will loop until the user has logged in
             cui.consoleLogin();
-        } else if (success){
+        } else if (success) {
             //check if the saved session id is still valid
             //the command name doesn't matter, it's just
             //going to check the session id
@@ -36,14 +41,18 @@ public class GaxClient {
         //this will use this class's sendCommand method
         while (true) {
             cui.askForCommand();
+            try {
+                socket.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
-
     }
 
     public static JSONObject sendCommand(String command) {
         //gets text command, sends json, receives & returns json
         try {
-            Socket socket = new Socket(ip, port);
+            socket = new Socket(ip, port);
             System.out.println("");
             PrintStream ps = new PrintStream(socket.getOutputStream());
             System.out.println("Sending command: " + command);
@@ -70,6 +79,7 @@ public class GaxClient {
             }
             return rjo;
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("Can't connect to the server.");
         }
         return null;
@@ -108,6 +118,10 @@ public class GaxClient {
 
     public static void checkReason(int r) {
         switch (r) {
+            case 2:
+                //void session check error code
+                //actually its generic nvm
+                return;
             case 1:
                 System.out.println("Session has expired. Please login");
                 cui.consoleLogin();

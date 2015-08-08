@@ -9,6 +9,7 @@ public class server {
     static MongoClient mongoClient;
     static DB gaxDB;
     static String dbip = "192.168.1.150";
+    static int port = 42924;
 
     public static void main(String args[]) {
         System.out.println("Gax Server \n");
@@ -28,7 +29,7 @@ public class server {
             serverMemory.loadAll();
 
             //start looking for clients
-            ServerSocket server = new ServerSocket(42924);
+            ServerSocket server = new ServerSocket(port);
             while (true) {
                 try {
                     //wait for a connection on server.accept
@@ -44,7 +45,6 @@ public class server {
                 }
             }
         } catch (IOException e) {
-            System.out.println("293786");
             if (e.getMessage().startsWith("Address already in use")) {
                 System.out.println("Server is already running!");
                 System.exit(0);

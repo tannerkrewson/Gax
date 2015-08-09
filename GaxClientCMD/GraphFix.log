@@ -1,9 +1,0 @@
-Driver          : aticfx32.dll
-Description     : AMD Radeon HD 6800 Series
-DeviceName      : \\.\DISPLAY2
-VendorID     (*): 4098
-DeviceID     (*): 26424
-SubSysID        : 822285954
-Revision        : 0
-WHQLLevel       : 0
-DriverVersion(*): 0x00080011000A057C

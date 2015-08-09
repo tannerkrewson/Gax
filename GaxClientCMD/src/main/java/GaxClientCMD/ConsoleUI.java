@@ -81,9 +81,8 @@ public class ConsoleUI {
 
     public void consoleSaveID() {
         boolean su = askYNQuestion("Would you like to save your session?");
-        if (su) {
-            GaxClient.cm.writeCurConfig();
-        }
+        GaxClient.autoLogin = su;
+        GaxClient.cm.writeCurConfig();
     }
 
     public void consoleRegister() {

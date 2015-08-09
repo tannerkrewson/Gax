@@ -28,7 +28,7 @@ public class GameDownloader {
         InputStream is = null;
 
         try {
-            is = GaxClient.socket.getInputStream();
+            is = GaxClient.sc.socket.getInputStream();
         } catch (IOException ex) {
             ex.printStackTrace();
             return false;

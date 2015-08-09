@@ -3,8 +3,6 @@ package GaxClientCMD;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.JSONObject;
 
 public class GaxClient {
@@ -13,81 +11,70 @@ public class GaxClient {
     static String ip = "localhost";
     static int port = 42924;
 
-    static Socket socket;
-
     static GaxSession gs = new GaxSession();
     static ConsoleUI cui = new ConsoleUI();
     static ClientMemory cm = new ClientMemory();
     static GameDownloader gd = new GameDownloader();
     static FileReader fr = new FileReader(); //this is not the java.io one
+    static ServerCommunicator sc = new ServerCommunicator();
 
+    static boolean autoLogin;
     static ArrayList<Integer> installedgames = new ArrayList();
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws InterruptedException {
 
+        /* TODO: General GUI object that console and New Gui will extend */
         //console startup
         cui.startup();
+
+        //attempt to connect to the server
+        sc.connectToServer();
 
         //if the config file exists, it will use the uname and session id
         //from that and skip login
         //in its current state, it will not validate until after the first 
         //command is sent to the server by the client
         boolean success = cm.getSavedConfig();
-        if (!success) {
-            //this will loop until the user has logged in
-            cui.consoleLogin();
-        } else if (success) {
+
+        //if we successfully loaded the config and autoLogin was enabled
+        if (success && autoLogin) {
             //check if the saved session id is still valid
             //the command name doesn't matter, it's just
             //going to check the session id
             sendCommand("void");
+            //otherwise (e.g. the config file wasn't found or autoLogin wasn't picked)
+        } else {
+            //this will loop until the user has logged in
+            cui.consoleLogin();
         }
 
         //this will use this class's sendCommand method
         while (true) {
             cui.askForCommand();
+
             try {
-                socket.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
+                sc.socket.close();
+            } catch (Exception ex) {
+                System.out.println("Socket already closed?");
+                ex.printStackTrace(System.out);
             }
         }
     }
 
     public static JSONObject sendCommand(String command) {
+        sc.connectToServer();
+
         //gets text command, sends json, receives & returns json
-        try {
-            socket = new Socket(ip, port);
-            System.out.println("");
-            PrintStream ps = new PrintStream(socket.getOutputStream());
-            System.out.println("Sending command: " + command);
-            JSONObject sjo = baseJSON();
-            sjo.put("command", command);
+        System.out.println("Sending command: " + command);
+        JSONObject sjo = baseJSON();
+        sjo.put("command", command);
 
-            //send the json as a string
-            ps.println(sjo.toString());
-            System.out.println("Command Sent. Waiting for reply...");
-            InputStreamReader ir = new InputStreamReader(socket.getInputStream());
-            BufferedReader br = new BufferedReader(ir);
-            JSONObject rjo = new JSONObject(br.readLine());
-
-            System.out.println("Response to command " + rjo.getString("responseToCommand") + " received.");
-            //check to see if it was successful
-            if (rjo.getBoolean("success") == false) {
-                //if its not successful we'll check the reason error code.
-                checkReason(rjo.getInt("reason"));
-                //all uses of this function should check if it returns null
-                //because if it does, that means the error code has already
-                //been handled and should return to main
-                //this probably needs to be changed because it janky
-                return null;
-            }
-            return rjo;
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Can't connect to the server.");
+        if (!sc.sendJSON(sjo)) {
+            //already handled?
+            return null;
         }
-        return null;
+
+        return sc.receiveJSON();
     }
 
     public static JSONObject baseJSON() {
@@ -108,7 +95,7 @@ public class GaxClient {
                 try {
                     //grab the exe path from the game's gax.json
                     jo = fr.readJSONFile(cm.ConfigDir + "GaxGames\\" + gid + "\\gax.json");
-                    
+
                     //run the exe path that we got from the game's files above
                     runExecutable(cm.ConfigDir + "GaxGames\\" + gid + "\\" + jo.getString("startPath"));
                 } catch (IOException ex) {

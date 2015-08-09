@@ -16,6 +16,7 @@ public class ClientMemory {
         jo.put("Gax Client Config", "version");
         jo.put("username", GaxClient.gs.curUser);
         jo.put("sessionid", GaxClient.gs.sessionID);
+        jo.put("autoLogin", GaxClient.autoLogin);
 
         JSONArray ja = new JSONArray();
         for (Integer gid : GaxClient.installedgames) {
@@ -40,6 +41,7 @@ public class ClientMemory {
         //puts the data from the config into the memory, and the GaxSession variables
         GaxClient.gs.curUser = jo.getString("username");
         GaxClient.gs.sessionID = jo.getString("sessionid");
+        GaxClient.autoLogin = jo.getBoolean("autoLogin");
         JSONArray tempja = jo.getJSONArray("installedgames");
         if (tempja != null) {
             for (int i = 0; i < tempja.length(); i++) {

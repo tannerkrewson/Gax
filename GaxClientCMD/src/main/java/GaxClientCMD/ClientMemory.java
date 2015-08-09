@@ -19,7 +19,6 @@ public class ClientMemory {
 
         JSONArray ja = new JSONArray();
         for (Integer gid : GaxClient.installedgames) {
-            System.out.println(gid);
             ja.put(gid);
         }
         
@@ -30,18 +29,13 @@ public class ClientMemory {
     //returns true if it successfully wrote the saved data to the memory, otherwise false
     public boolean getSavedConfig() {
 
-        //trys to read config
-        String config = readTextFile(ConfigDir + ConfigFile);
-
-        //if its empty/not there, then our work here is done, otherwise we'll continue
-        if (config == null) {
-            System.out.println("Saved config not detected");
+        JSONObject jo;
+        try {
+            jo = GaxClient.fr.readJSONFile(ConfigDir + ConfigFile);
+        } catch (IOException ex) {
+            ex.printStackTrace(System.out);
             return false;
         }
-        System.out.println("Saved config detected");
-
-        //reads the saved config and converts to json object
-        JSONObject jo = new JSONObject(config);
 
         //puts the data from the config into the memory, and the GaxSession variables
         GaxClient.gs.curUser = jo.getString("username");
@@ -49,7 +43,6 @@ public class ClientMemory {
         JSONArray tempja = jo.getJSONArray("installedgames");
         if (tempja != null) {
             for (int i = 0; i < tempja.length(); i++) {
-                System.out.println(tempja.getInt(i));
                 GaxClient.installedgames.add(tempja.getInt(i));
             }
         }
@@ -83,22 +76,5 @@ public class ClientMemory {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public String readTextFile(String fullPath) {
-
-        try (BufferedReader br = new BufferedReader(new FileReader(fullPath))) {
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-            while (line != null) {
-                sb.append(line);
-                sb.append(System.lineSeparator());
-                line = br.readLine();
-            }
-            return sb.toString();
-        } catch (IOException e) {
-
-        }
-        return null;
     }
 }

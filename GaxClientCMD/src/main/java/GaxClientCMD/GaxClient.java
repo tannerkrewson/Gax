@@ -3,6 +3,8 @@ package GaxClientCMD;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONObject;
 
 public class GaxClient {
@@ -17,6 +19,7 @@ public class GaxClient {
     static ConsoleUI cui = new ConsoleUI();
     static ClientMemory cm = new ClientMemory();
     static GameDownloader gd = new GameDownloader();
+    static FileReader fr = new FileReader(); //this is not the java.io one
 
     static ArrayList<Integer> installedgames = new ArrayList();
 
@@ -100,11 +103,19 @@ public class GaxClient {
 
         //check if it is installed
         for (Integer pgid : installedgames) {
-            System.out.println(pgid);
             if (pgid == gid) {
-                //grab the exe path from the game's gax.json
-                JSONObject jo = readGAXJSON(gid);
-                runExecutable(cm.ConfigDir + "GaxGames\\" + gid + "\\" + jo.getString("startPath"));
+                JSONObject jo;
+                try {
+                    //grab the exe path from the game's gax.json
+                    jo = fr.readJSONFile(cm.ConfigDir + "GaxGames\\" + gid + "\\gax.json");
+                    
+                    //run the exe path that we got from the game's files above
+                    runExecutable(cm.ConfigDir + "GaxGames\\" + gid + "\\" + jo.getString("startPath"));
+                } catch (IOException ex) {
+                    ex.printStackTrace(System.out);
+                    //the gax.json probably doesn't exists, we'll ask to install
+                    break;
+                }
                 return;
             }
         }
@@ -121,21 +132,6 @@ public class GaxClient {
          Track the exe to count gameplay time,
          etc.
          */
-    }
-
-    public static JSONObject readGAXJSON(int gid) {
-        //trys to read config
-        String gaxjson = cm.readTextFile(cm.ConfigDir + "GaxGames\\" + gid + "\\gax.json");
-
-        //if its empty/not there, then our work here is done, otherwise we'll continue
-        if (gaxjson == null) {
-            System.out.println("Gax.json for game " + gid + " not detected");
-            return null;
-        }
-        System.out.println("Saved config detected");
-
-        //reads the saved config and converts to json object
-        return new JSONObject(gaxjson);
     }
 
     public static void runExecutable(String path) {

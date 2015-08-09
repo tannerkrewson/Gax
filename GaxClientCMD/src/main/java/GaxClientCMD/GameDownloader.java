@@ -78,6 +78,12 @@ public class GameDownloader {
         ZipUtil.unpack(new File(zipFile), new File(outputFolder));
 
         System.out.println("Finished installing game " + gid);
+        
+        //add the game to the installedgames list
+        GaxClient.installedgames.add(gid);
+        
+        //write the config, including the list of installedgames
+        GaxClient.cm.writeCurConfig();
         return true;
     }
 }

@@ -16,6 +16,8 @@ public class ConsoleUI {
     }
 
     public void processCommand(String userInput) {
+        
+        //TODO: Move code that is not exclusive to a console interface
         if (userInput.equals("help")) {
             System.out.println("Possible commands: help, games, play game, exit");
         } else if (userInput.equals("test")) {
@@ -25,8 +27,8 @@ public class ConsoleUI {
             System.out.println("\nGax Game Catalog (gid, name):");
             System.out.println(temp);
         } else if (userInput.startsWith("play ")) {
-            String game = userInput.substring(5);
-            GaxClient.runGame(game);
+            String gid = userInput.substring(5);
+            GaxClient.runGame(Integer.parseInt(gid));
         } else if (userInput.startsWith("download ")){
             int gid = Integer.parseInt(userInput.substring(9));
             boolean abc = GaxClient.gd.downloadGame(gid);

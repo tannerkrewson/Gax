@@ -2,6 +2,7 @@ package GaxClientCMD;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import org.json.JSONObject;
 
 public class GaxClient {
@@ -9,7 +10,7 @@ public class GaxClient {
     //ip and port of the server
     static String ip = "localhost";
     static int port = 42924;
-    
+
     static Socket socket;
 
     static GaxSession gs = new GaxSession();
@@ -17,7 +18,10 @@ public class GaxClient {
     static ClientMemory cm = new ClientMemory();
     static GameDownloader gd = new GameDownloader();
 
+    static ArrayList<Integer> installedgames = new ArrayList();
+
     public static void main(String args[]) {
+
         //console startup
         cui.startup();
 
@@ -91,15 +95,47 @@ public class GaxClient {
         return jo;
     }
 
-    public static void runGame(String game) {
-        System.out.println("Opening " + game);
-        //sends command to server, receives JSON with appropriate response
-        JSONObject jo = sendCommand("getPath " + game);
-        if (jo == null) {
-            //read comments in commandToJSONFromServer for what this is
-            return;
+    public static void runGame(int gid) {
+        System.out.println("Opening game " + gid);
+
+        //check if it is installed
+        for (Integer pgid : installedgames) {
+            System.out.println(pgid);
+            if (pgid == gid) {
+                //grab the exe path from the game's gax.json
+                JSONObject jo = readGAXJSON(gid);
+                runExecutable(cm.ConfigDir + "GaxGames\\" + gid + "\\" + jo.getString("startPath"));
+                return;
+            }
         }
-        runExecutable(jo.getString("path"));
+
+        if (cui.askYNQuestion("Game not installed. Would you like to install it now?")) {
+            System.out.println("THIS CODE WAS COPY PASTED FROM CONSOLEUI");
+            boolean abc = GaxClient.gd.downloadGame(gid);
+            if (abc) {
+                boolean def = GaxClient.gd.installGame(gid);
+            }
+        }
+
+        /* TODO: Tell the server we're playing the game,
+         Track the exe to count gameplay time,
+         etc.
+         */
+    }
+
+    public static JSONObject readGAXJSON(int gid) {
+        //trys to read config
+        String gaxjson = cm.readTextFile(cm.ConfigDir + "GaxGames\\" + gid + "\\gax.json");
+
+        //if its empty/not there, then our work here is done, otherwise we'll continue
+        if (gaxjson == null) {
+            System.out.println("Gax.json for game " + gid + " not detected");
+            return null;
+        }
+        System.out.println("Saved config detected");
+
+        //reads the saved config and converts to json object
+        return new JSONObject(gaxjson);
     }
 
     public static void runExecutable(String path) {
@@ -110,14 +146,14 @@ public class GaxClient {
             ProcessBuilder b = new ProcessBuilder(path);
             Process p = b.start();
         } catch (Exception e) {
-            System.out.println("Failed to open " + path);
+            System.out.println("Failed to open game: " + e.getLocalizedMessage());
         }
     }
 
     public static void checkReason(int r) {
         switch (r) {
             case 2:
-                //void session check error code
+                //void session check error code                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                 //actually its generic nvm
                 return;
             case 1:

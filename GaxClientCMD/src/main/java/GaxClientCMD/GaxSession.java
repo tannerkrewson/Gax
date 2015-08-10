@@ -14,7 +14,7 @@ public class GaxSession {
             return false;
             //need to do this with the password too
         }
-        System.out.println("Logging in...");
+        System.out.println("\nLogging in...");
         //sends command to server, receives JSON with appropriate response
         JSONObject jo = GaxClient.sendCommand("login " + username + " " + password);
         if (jo == null) {

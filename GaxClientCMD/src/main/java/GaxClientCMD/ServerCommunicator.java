@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONObject;
 
 public class ServerCommunicator {
@@ -17,7 +19,6 @@ public class ServerCommunicator {
             PrintStream ps = new PrintStream(socket.getOutputStream());
             //send the json as a string
             ps.println(sjo.toString());
-            System.out.println("JSON sent");
         } catch (Exception ex) {
             System.out.println("Error sending JSON to server");
             ex.printStackTrace();
@@ -68,7 +69,7 @@ public class ServerCommunicator {
     public boolean initConnection() {
         try {
             socket = new Socket(GaxClient.ip, GaxClient.port);
-            System.out.println("The server is up");
+            System.out.println("Successfully connected to server!");
         } catch (java.net.ConnectException e) {
             System.out.println("Couldn't connect to server.");
             return false;
@@ -77,5 +78,14 @@ public class ServerCommunicator {
             return false;
         }
         return true;
+    }
+    
+    public void disconnectFromServer(){
+        try {
+            socket.close();
+        } catch (IOException ex) {
+            System.out.println("Failed to close socket");
+            ex.printStackTrace();
+        }
     }
 }

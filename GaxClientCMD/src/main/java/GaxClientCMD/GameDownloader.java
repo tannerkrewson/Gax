@@ -18,6 +18,10 @@ public class GameDownloader {
             return false;
         }
 
+        //connect to server
+        GaxClient.sc.disconnectFromServer();
+        GaxClient.sc.connectToServer();
+        
         //installation directory
         String sdir = GaxClient.cm.ConfigDir + "GaxGames/" + gid + "/";
         String sfile = gid + ".zip";

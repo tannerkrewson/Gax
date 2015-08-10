@@ -1,8 +1,7 @@
 package GaxClientCMD;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,8 +32,11 @@ public class ClientMemory {
         JSONObject jo;
         try {
             jo = GaxClient.fr.readJSONFile(ConfigDir + ConfigFile);
+        } catch (NoSuchFileException ex){
+            System.out.println("Config file not found");
+            return false;
         } catch (IOException ex) {
-            ex.printStackTrace(System.out);
+            ex.printStackTrace();
             return false;
         }
 
@@ -72,8 +74,6 @@ public class ClientMemory {
             //write the JSON to the file
             FileWriter fw = new FileWriter(file);
             fw.write(obj.toString());
-            System.out.println("Wrote JSON to file");
-            System.out.println(obj);
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();

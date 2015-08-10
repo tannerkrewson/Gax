@@ -1,67 +1,60 @@
 package GaxServer;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import java.util.Date;
 import com.mongodb.util.JSON;
-import java.util.Random;
+import java.sql.ResultSet;
 import java.util.UUID;
 import org.json.JSONObject;
 
 public class sessionManager {
 
     //note that the user is logged in and verified when this is ran
-    public String newSession(DB gaxDB, String username, String clientIP) {
+    public String newSession(String username, String clientIP) {
 
-        //check for old session in the db and delete them
-        DBCollection col = gaxDB.getCollection("sessions");
-        DBCursor cursor = col.find();
-        //while there is another document in the collection, continue checking
-        //next() returns a value and advances itself when called
-        while (cursor.hasNext()) {
-            DBObject dbo = cursor.next();
-            String dbItem = dboToString(dbo, "username");
-            //if the username matches, delete that old shit
-            if (username.equals(dbItem)) {
-                System.out.println("Deleting old session: " + dbo.toString());
-                col.remove(dbo);
-            }
+        try {
+            //check for old session in the db and delete them
+            ResultSet rs = server.dbc.query("SELECT * FROM USERS.LOGIN WHERE USERNAME = '" + username + "';");
+            rs.close();
+            /* we shouldn't need to delete the old sessionid
+             while (rs.next()) {
+             //if the username matches, delete that old shit
+             if (username.equals(rs.getString("username"))) {
+             System.out.println("Deleting old session: " + rs.getString("sessionid"));
+             server.dbc.query("UPDATE USERS.LOGIN set SESSIONID = '' WHERE USERNAME = " + username + ";");
+             }
+             }
+             */
+            
+            //put the session in the database
+            String sid = generateID();
+            System.out.println("UPDATE USERS.LOGIN SET SESSIONID = '" + sid + "' WHERE USERNAME = '" + username + "';");
+            server.dbc.update("UPDATE USERS.LOGIN SET SESSIONID = '" + sid + "' WHERE USERNAME = '" + username + "';");
+
+            //return the session id as a string
+            return sid;
+        } catch (Exception ex) {
+            System.out.println("Failed to get new session");
+            ex.printStackTrace();
+            return null;
         }
-
-        //put the session in the database
-        Date date = new Date();
-        String sid = generateID();
-        BasicDBObject document = new BasicDBObject();
-        document.put("username", username);
-        document.put("ip", clientIP);
-        document.put("date", date);
-        document.put("sessionID", sid);
-        gaxDB.getCollection("sessions").insert(document);
-
-        //return the session id as a string
-        return sid;
     }
 
-    public Boolean checkSession(DB gaxDB, String username, String sessionid) {
-        DBCursor cursor = gaxDB.getCollection("sessions").find();
-        //while there is another document in the collection, continue checking
-        //next() returns a value and advances itself when called
-        while (cursor.hasNext()) {
-            DBObject dbo = cursor.next();
-            String dbItem = dboToString(dbo, "username");
-
-            //if the username matches and the sessionid matches
-            //we'll add a more complicated check, like timebomb, eventually
-            if (username.equals(dbItem) && sessionid.equals(dboToString(dbo, "sessionID"))) {
+    public Boolean checkSession(String username, String sessionid) {
+        try {
+            ResultSet rs = server.dbc.query("SELECT * FROM USERS.LOGIN "
+                    + "WHERE USERNAME = '" + username + "' AND "
+                    + "SESSIONID = '" + sessionid + "';");
+            if (rs.next()) {
+                System.out.println("Check session result was not null :)");
                 return true;
             }
-            //if theyre not equal, prompt login
+            System.out.println("Check session result was null :(");
+            return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println("Failed to check session");
+            return false;
         }
-        //after its searched through the whole database we can assume the user needs to login
-        return false;
     }
 
     public static String generateID() {

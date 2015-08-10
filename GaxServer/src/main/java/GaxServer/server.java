@@ -1,17 +1,20 @@
 package GaxServer;
 
-import com.mongodb.*;
 import java.io.*;
 import java.net.*;
 
 public class server {
-
-    static MongoClient mongoClient;
-    static DB gaxDB;
+    
+    //static MongoClient mongoClient;
+    //static DB gaxDB;
     static String dbip = "192.168.1.150";
     static int port = 42924;
+    
+    static DatabaseConnection dbc = new DatabaseConnection();
 
     public static void main(String args[]) {
+        
+        System.out.println(dbc.connect());
         System.out.println("Gax Server \n");
         System.out.println("Starting up...");
         //starts the console thread
@@ -19,12 +22,13 @@ public class server {
         new Thread(ct).start();
         try {
             //refresh the databases if it can find them (only need to do this once)
+            /*
             boolean rd = refreshDatabases();
             if (!rd) {
                 System.out.println("Error connecting to database.");
                 return;
             }
-
+*/
             //load the server memory, this can be done manually via console
             serverMemory.loadAll();
 
@@ -53,6 +57,7 @@ public class server {
         }
     }
 
+    /*
     public static boolean refreshDatabases() {
         try {
             System.out.println("Connecting to database...");
@@ -64,4 +69,5 @@ public class server {
             return false;
         }
     }
+    */
 }

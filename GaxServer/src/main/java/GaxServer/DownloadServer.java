@@ -1,9 +1,8 @@
 package GaxServer;
 
-import com.mongodb.DBCursor;
-import com.mongodb.util.JSON;
 import java.io.*;
 import java.net.Socket;
+import java.sql.ResultSet;
 import org.json.JSONObject;
 
 public class DownloadServer {
@@ -39,16 +38,20 @@ public class DownloadServer {
     }
 
     private boolean gameExists(int gid) {
-        DBCursor cursor = server.gaxDB.getCollection("games").find();
-        while (cursor.hasNext()) {
-            JSONObject json = new JSONObject(JSON.serialize(cursor.next()));
-
-            //if the gid passes matches the one in the db
-            if (json.getInt("gid") == gid) {
+        try {
+            ResultSet rs = server.dbc.query("SELECT * FROM GAMES.INFO "
+                    + "WHERE GID = " + gid + ";");
+            if (rs.next()) {
+                System.out.println("Check gid result was not null :)");
                 return true;
             }
+            System.out.println("Check gid result was null :(");
+            return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println("Failed to check gid");
+            return false;
         }
-        return false;
     }
 
     private void sendFile(String path) {

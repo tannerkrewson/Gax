@@ -4,6 +4,8 @@ import com.mongodb.*;
 import com.mongodb.util.JSON;
 import java.io.*;
 import java.net.*;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import org.json.JSONObject;
 
 public class serverThread implements Runnable {
@@ -67,12 +69,9 @@ public class serverThread implements Runnable {
             clientDataSender(register(received.split(" ")[1], received.split(" ")[2]));
         } else if (received.equals("games")) {
             clientDataSender(listGames());
-        } else if (received.startsWith("getPath ")) {
-            String game = received.substring(8);
-            clientDataSender(getPath(game));
         } else if (received.startsWith("download ")) {
             String gid = received.substring(9);
-            
+
             ds = new DownloadServer(socket, this);
             ds.sendGame(Integer.parseInt(gid));
         } else {
@@ -89,7 +88,7 @@ public class serverThread implements Runnable {
         //watch out, it could be null!!
         String username = jo.getString("username");
         String sessionID = jo.getString("sessionID");
-        if (sManager.checkSession(server.gaxDB, username, sessionID)) {
+        if (sManager.checkSession(username, sessionID)) {
             System.out.println("Session ID " + sessionID + " for " + username + " is valid!");
             return true;
         } else {
@@ -112,40 +111,37 @@ public class serverThread implements Runnable {
 
     public JSONObject register(String username, String password) {
         try {
-            BasicDBObject document = new BasicDBObject();
-            document.put("username", username);
-            document.put("password", password);
-            server.gaxDB.getCollection("login").insert(document);
-            //create JSON to be sent
+            server.dbc.update("INSERT INTO USERS.LOGIN (USERNAME,PASSWORD) "
+                    + "VALUES ('" + username + "','" + password + "')");
+            //send response to client
             JSONObject jo = new JSONObject();
             jo.put("responseToCommand", "register");
-            jo.put("success", 1);
+            jo.put("success", true);
             return jo;
         } catch (Exception e) {
+            e.printStackTrace();
             //create JSON to be sent
             JSONObject jo = new JSONObject();
             jo.put("responseToCommand", "register");
             jo.put("success", false);
-            jo.put("error", e.getMessage());
+            jo.put("reason", 2);
             return jo;
         }
     }
 
     public JSONObject login(String username, String password) {
         System.out.println("Logging in " + username);
-        DBCursor cursor = server.gaxDB.getCollection("login").find();
-        //while there is another game in the collection, continue checking
-        //next() returns a value and advances itself when called
-        while (cursor.hasNext()) {
-            DBObject dbo = cursor.next();
-            String dbItem = dboToString(dbo, "username");
-
+        try {
+            ResultSet rs = server.dbc.query("SELECT * FROM USERS.LOGIN "
+                    + "WHERE USERNAME = '" + username + "' AND "
+                    + "PASSWORD = '" + password + "';");
             //if the username and password match, we're good to go
-            if (username.equals(dbItem) && password.equals(dboToString(dbo, "password"))) {
-
+            if (rs.next()) {
+                System.out.println("Check login result was not null :)");
+                
                 //register a session id                
                 String cip = socket.getLocalSocketAddress().toString();
-                String sid = sManager.newSession(server.gaxDB, username, cip);
+                String sid = sManager.newSession(username, cip);
 
                 //create JSON to be sent
                 JSONObject jo = new JSONObject();
@@ -154,6 +150,10 @@ public class serverThread implements Runnable {
                 jo.put("success", true);
                 return jo;
             }
+            System.out.println("Check login result was null :(");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println("Failed to check login");
         }
         JSONObject jo = new JSONObject();
         jo.put("responseToCommand", "login");
@@ -162,36 +162,11 @@ public class serverThread implements Runnable {
         return jo;
     }
 
-    public JSONObject getPath(String game) {
-        System.out.println("Finding the path of " + game);
-        DBCursor cursor = server.gaxDB.getCollection("games").find();
-        //while there is another game in the collection, continue checking
-        //next() returns a value and advances itself when called
-        while (cursor.hasNext()) {
-            DBObject dbo = cursor.next();
-            String dbItem = dboToString(dbo, "name");
-            if (game.equals(dbItem)) {
-                String path = dboToString(dbo, "path");
-                System.out.println("Path found: " + path);
-                //create JSON to be sent
-                JSONObject jo = new JSONObject();
-                jo.put("responseToCommand", "getPath");
-                jo.put("success", true);
-                jo.put("path", path);
-                return jo;
-            }
-        }
-        JSONObject jo = new JSONObject();
-        jo.put("responseToCommand", "getPath");
-        jo.put("success", false);
-        return jo;
-    }
-
     public JSONObject listGames() {
-        String[][] gl = serverMemory.gamesList();
+        ArrayList<GaxGame> gl = serverMemory.gamesList();
         String listOfGames = "";
-        for (int i = 0; i < gl.length; i++) {
-            listOfGames += gl[i][0] + "," + gl[i][1] + "\n";
+        for (GaxGame tempgame : gl) {
+            listOfGames += tempgame.gid + "," + tempgame.title + "\n";
         }
         JSONObject jo = new JSONObject();
         jo.put("responseToCommand", "games");

@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.JSONObject;
 
 public class ServerCommunicator {
@@ -35,16 +33,20 @@ public class ServerCommunicator {
             BufferedReader br = new BufferedReader(ir);
             rjo = new JSONObject(br.readLine());
             System.out.println("Response to command " + rjo.getString("responseToCommand") + " received.");
+
+            /* TODO: Rewrite this fucking checkReason shit */
             //check to see if it was successful
-            if (rjo.getBoolean("success") == false) {
-                //if its not successful we'll check the reason error code.
-                GaxClient.checkReason(rjo.getInt("reason"));
-                //all uses of this function should check if it returns null
-                //because if it does, that means the error code has already
-                //been handled and should return to main
-                //this probably needs to be changed because it janky
-                return null;
-            }
+            /*
+             if (rjo.getBoolean("success") == false) {
+             //if its not successful we'll check the reason error code.
+             GaxClient.checkReason(rjo.getInt("reason"));
+             //all uses of this function should check if it returns null
+             //because if it does, that means the error code has already
+             //been handled and should return to main
+             //this probably needs to be changed because it janky
+             return null;
+             }
+             */
             ir.close();
         } catch (IOException ex) {
             ex.printStackTrace(System.err);
@@ -79,8 +81,8 @@ public class ServerCommunicator {
         }
         return true;
     }
-    
-    public void disconnectFromServer(){
+
+    public void disconnectFromServer() {
         try {
             socket.close();
         } catch (IOException ex) {

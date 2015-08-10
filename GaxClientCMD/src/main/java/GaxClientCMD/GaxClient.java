@@ -70,9 +70,9 @@ public class GaxClient {
 
         if (!sc.sendJSON(sjo)) {
             //already handled?
+            System.out.println("The JSONObject that sendCommand is returning is null");
             return null;
         }
-
         return sc.receiveJSON();
     }
 

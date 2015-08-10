@@ -31,7 +31,6 @@ public class ConsoleUI {
             GaxClient.runGame(Integer.parseInt(gid));
         } else if (userInput.startsWith("download ")){
             int gid = Integer.parseInt(userInput.substring(9));
-            
             boolean abc = GaxClient.gd.downloadGame(gid);
             if (abc){
                 boolean def = GaxClient.gd.installGame(gid);

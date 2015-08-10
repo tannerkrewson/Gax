@@ -33,10 +33,8 @@ public class sessionManager {
                     + "WHERE USERNAME = '" + username + "' AND "
                     + "SESSIONID = '" + sessionid + "';");
             if (rs.next()) {
-                System.out.println("Check session result was not null :)");
                 return true;
             }
-            System.out.println("Check session result was null :(");
             return false;
         } catch (Exception ex) {
             ex.printStackTrace();

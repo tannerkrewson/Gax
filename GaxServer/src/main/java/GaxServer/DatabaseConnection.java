@@ -39,7 +39,7 @@ public class DatabaseConnection {
         //rs.close();
         //stmt.close();
         //connection.close();
-        System.out.println("Operation done successfully");
+        System.out.println("Query completed successfully");
         return rs;
     }
 
@@ -52,6 +52,6 @@ public class DatabaseConnection {
         //rs.close();
         //stmt.close();
         //connection.close();
-        System.out.println("Operation done successfully");
+        System.out.println("Update completed successfully");
     }
 }

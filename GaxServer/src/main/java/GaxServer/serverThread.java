@@ -69,7 +69,6 @@ public class serverThread implements Runnable {
             clientDataSender(listGames());
         } else if (received.startsWith("download ")) {
             String gid = received.substring(9);
-
             ds = new DownloadServer(socket, this);
             ds.sendGame(Integer.parseInt(gid));
         } else {
@@ -135,8 +134,6 @@ public class serverThread implements Runnable {
                     + "PASSWORD = '" + password + "';");
             //if the username and password match, we're good to go
             if (rs.next()) {
-                System.out.println("Check login result was not null :)");
-                
                 //register a session id                
                 String cip = socket.getLocalSocketAddress().toString();
                 String sid = sManager.newSession(username, cip);
@@ -148,7 +145,6 @@ public class serverThread implements Runnable {
                 jo.put("success", true);
                 return jo;
             }
-            System.out.println("Check login result was null :(");
         } catch (Exception ex) {
             ex.printStackTrace();
             System.out.println("Failed to check login");

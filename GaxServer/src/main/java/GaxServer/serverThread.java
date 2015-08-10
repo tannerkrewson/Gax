@@ -1,7 +1,5 @@
 package GaxServer;
 
-import com.mongodb.*;
-import com.mongodb.util.JSON;
 import java.io.*;
 import java.net.*;
 import java.sql.ResultSet;
@@ -173,11 +171,6 @@ public class serverThread implements Runnable {
         jo.put("success", true);
         jo.put("games", listOfGames);
         return jo;
-    }
-
-    public String dboToString(DBObject dbo, String item) {
-        JSONObject json = new JSONObject(JSON.serialize(dbo));
-        return json.getString(item);
     }
 
     /*

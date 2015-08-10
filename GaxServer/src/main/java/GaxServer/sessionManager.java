@@ -1,10 +1,7 @@
 package GaxServer;
 
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import java.sql.ResultSet;
 import java.util.UUID;
-import org.json.JSONObject;
 
 public class sessionManager {
 
@@ -15,15 +12,6 @@ public class sessionManager {
             //check for old session in the db and delete them
             ResultSet rs = server.dbc.query("SELECT * FROM USERS.LOGIN WHERE USERNAME = '" + username + "';");
             rs.close();
-            /* we shouldn't need to delete the old sessionid
-             while (rs.next()) {
-             //if the username matches, delete that old shit
-             if (username.equals(rs.getString("username"))) {
-             System.out.println("Deleting old session: " + rs.getString("sessionid"));
-             server.dbc.query("UPDATE USERS.LOGIN set SESSIONID = '' WHERE USERNAME = " + username + ";");
-             }
-             }
-             */
             
             //put the session in the database
             String sid = generateID();
@@ -60,10 +48,5 @@ public class sessionManager {
     public static String generateID() {
         String id = UUID.randomUUID().toString().replaceAll("-", "");
         return id;
-    }
-
-    public String dboToString(DBObject dbo, String item) {
-        JSONObject json = new JSONObject(JSON.serialize(dbo));
-        return json.getString(item);
     }
 }

@@ -1,4 +1,4 @@
-package GaxClientCMD;
+package GaxClient;
 
 import java.io.*;
 import java.nio.file.*;
@@ -13,12 +13,12 @@ public class ClientMemory {
     public void writeCurConfig() {
         JSONObject jo = new JSONObject();
         jo.put("Gax Client Config", "version");
-        jo.put("username", GaxClient.gs.curUser);
-        jo.put("sessionid", GaxClient.gs.sessionID);
-        jo.put("autoLogin", GaxClient.autoLogin);
+        jo.put("username", Client.gs.curUser);
+        jo.put("sessionid", Client.gs.sessionID);
+        jo.put("autoLogin", Client.autoLogin);
 
         JSONArray ja = new JSONArray();
-        for (Integer gid : GaxClient.installedgames) {
+        for (Integer gid : Client.installedgames) {
             ja.put(gid);
         }
         
@@ -31,7 +31,7 @@ public class ClientMemory {
 
         JSONObject jo;
         try {
-            jo = GaxClient.fr.readJSONFile(ConfigDir + ConfigFile);
+            jo = Client.fr.readJSONFile(ConfigDir + ConfigFile);
         } catch (NoSuchFileException ex){
             System.out.println("Config file not found");
             return false;
@@ -41,13 +41,13 @@ public class ClientMemory {
         }
 
         //puts the data from the config into the memory, and the GaxSession variables
-        GaxClient.gs.curUser = jo.getString("username");
-        GaxClient.gs.sessionID = jo.getString("sessionid");
-        GaxClient.autoLogin = jo.getBoolean("autoLogin");
+        Client.gs.curUser = jo.getString("username");
+        Client.gs.sessionID = jo.getString("sessionid");
+        Client.autoLogin = jo.getBoolean("autoLogin");
         JSONArray tempja = jo.getJSONArray("installedgames");
         if (tempja != null) {
             for (int i = 0; i < tempja.length(); i++) {
-                GaxClient.installedgames.add(tempja.getInt(i));
+                Client.installedgames.add(tempja.getInt(i));
             }
         }
         return true;

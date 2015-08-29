@@ -11,9 +11,9 @@ import org.json.JSONObject;
 public class DownloadServer {
 
     Socket socket;
-    serverThread st;
+    ServerThread st;
 
-    public DownloadServer(Socket s, serverThread st) {
+    public DownloadServer(Socket s, ServerThread st) {
         socket = s;
         this.st = st;
     }
@@ -87,7 +87,7 @@ public class DownloadServer {
 
     private boolean gameExists(int gid) {
         try {
-            ResultSet rs = server.dbc.query("SELECT * FROM GAMES.INFO "
+            ResultSet rs = Server.dbc.query("SELECT * FROM GAMES.INFO "
                     + "WHERE GID = " + gid + ";");
             if (rs.next()) {
                 return true;

@@ -1,4 +1,4 @@
-package GaxClientCMD;
+package GaxClient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,10 +58,10 @@ public class ServerCommunicator {
 
     public void connectToServer() {
         //attempt to connect to the server
-        boolean connectedToServer = GaxClient.sc.initConnection();
+        boolean connectedToServer = Client.sc.initConnection();
         while (!connectedToServer) {
-            if (GaxClient.cui.askYNQuestion("Try to connect again?")) {
-                connectedToServer = GaxClient.sc.initConnection();
+            if (Client.cui.askYNQuestion("Try to connect again?")) {
+                connectedToServer = Client.sc.initConnection();
             } else {
                 System.exit(0);
             }
@@ -70,7 +70,7 @@ public class ServerCommunicator {
 
     public boolean initConnection() {
         try {
-            socket = new Socket(GaxClient.ip, GaxClient.port);
+            socket = new Socket(Client.ip, Client.port);
             System.out.println("Successfully connected to server!");
         } catch (java.net.ConnectException e) {
             System.out.println("Couldn't connect to server.");

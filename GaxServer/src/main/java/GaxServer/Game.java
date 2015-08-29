@@ -1,6 +1,6 @@
 package GaxServer;
 
-public class GaxGame {
+public class Game {
     int gid;
     String title;
 }

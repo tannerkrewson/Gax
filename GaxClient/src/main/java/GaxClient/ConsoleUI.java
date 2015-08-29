@@ -1,4 +1,4 @@
-package GaxClientCMD;
+package GaxClient;
 
 import java.util.Scanner;
 
@@ -23,17 +23,17 @@ public class ConsoleUI {
         } else if (userInput.equals("test")) {
             //System.out.println(sendCommand("test"));
         } else if (userInput.equals("games")) {
-            String temp = GaxClient.sendCommand("games").getString("games");
+            String temp = Client.sendCommand("games").getString("games");
             System.out.println("\nGax Game Catalog (gid, name):");
             System.out.println(temp);
         } else if (userInput.startsWith("play ")) {
             String gid = userInput.substring(5);
-            GaxClient.runGame(Integer.parseInt(gid));
+            Client.runGame(Integer.parseInt(gid));
         } else if (userInput.startsWith("download ")){
             int gid = Integer.parseInt(userInput.substring(9));
-            boolean abc = GaxClient.gd.downloadGame(gid);
+            boolean abc = Client.gd.downloadGame(gid);
             if (abc){
-                boolean def = GaxClient.gd.installGame(gid);
+                boolean def = Client.gd.installGame(gid);
             }
         } else if (userInput.equals("exit")) {
             System.out.println("Closing Gax Client");
@@ -70,7 +70,7 @@ public class ConsoleUI {
             }
             System.out.println("Password:");
             String p = cmd.nextLine();
-            loginSuccess = GaxClient.gs.sendLogin(u, p);
+            loginSuccess = Client.gs.sendLogin(u, p);
         }
         
         //I put this here because consoleLogin is also called if the session id
@@ -81,8 +81,8 @@ public class ConsoleUI {
 
     public void consoleSaveID() {
         boolean su = askYNQuestion("Would you like to save your session?");
-        GaxClient.autoLogin = su;
-        GaxClient.cm.writeCurConfig();
+        Client.autoLogin = su;
+        Client.cm.writeCurConfig();
     }
 
     public void consoleRegister() {
@@ -93,7 +93,7 @@ public class ConsoleUI {
             String newU = cmd.nextLine();
             System.out.println("Password:");
             String newP = cmd.nextLine();
-            regSuccess = GaxClient.gs.sendReg(newU, newP);
+            regSuccess = Client.gs.sendReg(newU, newP);
         }
         consoleLogin();
     }

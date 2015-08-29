@@ -3,20 +3,20 @@ package GaxServer;
 import java.sql.ResultSet;
 import java.util.UUID;
 
-public class sessionManager {
+public class SessionManager {
 
     //note that the user is logged in and verified when this is ran
     public String newSession(String username, String clientIP) {
 
         try {
             //check for old session in the db and delete them
-            ResultSet rs = server.dbc.query("SELECT * FROM USERS.LOGIN WHERE USERNAME = '" + username + "';");
+            ResultSet rs = Server.dbc.query("SELECT * FROM USERS.LOGIN WHERE USERNAME = '" + username + "';");
             rs.close();
             
             //put the session in the database
             String sid = generateID();
             System.out.println("UPDATE USERS.LOGIN SET SESSIONID = '" + sid + "' WHERE USERNAME = '" + username + "';");
-            server.dbc.update("UPDATE USERS.LOGIN SET SESSIONID = '" + sid + "' WHERE USERNAME = '" + username + "';");
+            Server.dbc.update("UPDATE USERS.LOGIN SET SESSIONID = '" + sid + "' WHERE USERNAME = '" + username + "';");
 
             //return the session id as a string
             return sid;
@@ -29,7 +29,7 @@ public class sessionManager {
 
     public Boolean checkSession(String username, String sessionid) {
         try {
-            ResultSet rs = server.dbc.query("SELECT * FROM USERS.LOGIN "
+            ResultSet rs = Server.dbc.query("SELECT * FROM USERS.LOGIN "
                     + "WHERE USERNAME = '" + username + "' AND "
                     + "SESSIONID = '" + sessionid + "';");
             if (rs.next()) {

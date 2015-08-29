@@ -1,0 +1,8 @@
+/GaxClient/.nb-gradle/
+/GaxServer/.nb-gradle/
+/GaxClient/.gradle/
+/GaxServer/.gradle/
+/GaxClient/build/
+/GaxServer/build/
+/GaxServer/GaxGames/
+/GaxServer/aws/

@@ -1,4 +1,4 @@
-package GaxClientCMD;
+package GaxClient;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -17,7 +17,7 @@ public class GameDownloader {
         try {
 
             //first tell the server what we about to throw down
-            JSONObject jo = GaxClient.sendCommand("download " + gid);
+            JSONObject jo = Client.sendCommand("download " + gid);
             System.out.println(jo.toString());
             //check if the game exists and if the server is ready to send to us
             boolean success = jo.getBoolean("success");
@@ -30,7 +30,7 @@ public class GameDownloader {
             //URL downloadURL = new URL("http://www.solidbackgrounds.com/images/1920x1080/1920x1080-red-solid-color-background.jpg");
             
             //installation directory
-            String sdir = GaxClient.cm.ConfigDir + "GaxGames/" + gid + "/";
+            String sdir = Client.cm.ConfigDir + "GaxGames/" + gid + "/";
             String sfile = gid + ".zip";
             
             File outputFile = new File(sdir + sfile);
@@ -96,7 +96,7 @@ public class GameDownloader {
 
         //we need to check if it exists before we unzip
         System.out.println("Installing game " + gid);
-        String outputFolder = GaxClient.cm.ConfigDir + "GaxGames\\" + gid + "\\";
+        String outputFolder = Client.cm.ConfigDir + "GaxGames\\" + gid + "\\";
         String zipFile = outputFolder + gid + ".zip";
 
         ZipUtil.unpack(new File(zipFile), new File(outputFolder));
@@ -104,10 +104,10 @@ public class GameDownloader {
         System.out.println("Finished installing game " + gid);
 
         //add the game to the installedgames list
-        GaxClient.installedgames.add(gid);
+        Client.installedgames.add(gid);
 
         //write the config, including the list of installedgames
-        GaxClient.cm.writeCurConfig();
+        Client.cm.writeCurConfig();
         return true;
     }
 }

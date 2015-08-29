@@ -3,16 +3,16 @@ package GaxServer;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
-public class serverMemory {
+public class ServerMemory {
 
-    private static ArrayList<GaxGame> gl = new ArrayList<>();
+    private static ArrayList<Game> gl = new ArrayList<>();
 
     public static void loadAll() {
         System.out.println("Reloading server memory");
         loadGamesList();
     }
 
-    public static ArrayList<GaxGame> gamesList() {
+    public static ArrayList<Game> gamesList() {
         //will expand this to validate if user is premium and act as such
         return gl;
     }
@@ -21,9 +21,9 @@ public class serverMemory {
         ResultSet rs;
         try {
             System.out.println("Loading games");
-            rs = server.dbc.query("SELECT * FROM GAMES.INFO;");
+            rs = Server.dbc.query("SELECT * FROM GAMES.INFO;");
             while (rs.next()) {
-                GaxGame tempgame = new GaxGame();
+                Game tempgame = new Game();
                 tempgame.gid = rs.getInt("gid");
                 tempgame.title = rs.getString("title");
                 gl.add(tempgame);

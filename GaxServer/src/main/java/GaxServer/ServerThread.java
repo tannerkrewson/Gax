@@ -6,30 +6,33 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import org.json.JSONObject;
 
-public class serverThread implements Runnable {
+public class ServerThread {
 
-    Socket socket;
-    sessionManager sManager = new sessionManager();
+    private Socket socket;
+    SessionManager sManager = new SessionManager();
     DownloadServer ds;
 
-    public serverThread(Socket s) {
+    public ServerThread(Socket s) {
         socket = s;
     }
 
-    @Override
-    public void run() {
+    public JSONObject getCommandFromClient() {
         //create streams
         InputStreamReader isr = null;
         try {
             isr = new InputStreamReader(socket.getInputStream());
             BufferedReader br = new BufferedReader(isr);
             //converts received string to JSONObject and passes it along
-            execJSONCommand(new JSONObject(br.readLine()));
-            isr.close();
-            br.close();
-            socket.close();
+            JSONObject temp = (new JSONObject(br.readLine()));
+            // ONE of these close the socket or something, so i commented them
+            //isr.close();
+            //br.close();
+            //socket.close();
+            return temp;
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Returning blank JSON");
+            return (new JSONObject());
         }
     }
 
@@ -81,6 +84,9 @@ public class serverThread implements Runnable {
         }
     }
 
+    /*
+     TODO: Place the rest of the functions into their own object, i think
+     */
     public boolean checkValidSession(JSONObject jo) {
         //watch out, it could be null!!
         String username = jo.getString("username");
@@ -101,6 +107,7 @@ public class serverThread implements Runnable {
             System.out.println("Sending: " + cmd);
             ps.println(cmd + "\n");
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("Error sending data");
         }
 
@@ -108,7 +115,7 @@ public class serverThread implements Runnable {
 
     public JSONObject register(String username, String password) {
         try {
-            server.dbc.update("INSERT INTO USERS.LOGIN (USERNAME,PASSWORD) "
+            Server.dbc.update("INSERT INTO USERS.LOGIN (USERNAME,PASSWORD) "
                     + "VALUES ('" + username + "','" + password + "')");
             //send response to client
             JSONObject jo = new JSONObject();
@@ -129,7 +136,7 @@ public class serverThread implements Runnable {
     public JSONObject login(String username, String password) {
         System.out.println("Logging in " + username);
         try {
-            ResultSet rs = server.dbc.query("SELECT * FROM USERS.LOGIN "
+            ResultSet rs = Server.dbc.query("SELECT * FROM USERS.LOGIN "
                     + "WHERE USERNAME = '" + username + "' AND "
                     + "PASSWORD = '" + password + "';");
             //if the username and password match, we're good to go
@@ -157,9 +164,9 @@ public class serverThread implements Runnable {
     }
 
     public JSONObject listGames() {
-        ArrayList<GaxGame> gl = serverMemory.gamesList();
+        ArrayList<Game> gl = ServerMemory.gamesList();
         String listOfGames = "";
-        for (GaxGame tempgame : gl) {
+        for (Game tempgame : gl) {
             listOfGames += tempgame.gid + "," + tempgame.title + "\n";
         }
         JSONObject jo = new JSONObject();

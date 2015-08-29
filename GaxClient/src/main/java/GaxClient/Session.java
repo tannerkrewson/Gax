@@ -1,8 +1,8 @@
-package GaxClientCMD;
+package GaxClient;
 
 import org.json.JSONObject;
 
-public class GaxSession {
+public class Session {
 
     String sessionID;
     String curUser;
@@ -16,7 +16,7 @@ public class GaxSession {
         }
         System.out.println("\nLogging in...");
         //sends command to server, receives JSON with appropriate response
-        JSONObject jo = GaxClient.sendCommand("login " + username + " " + password);
+        JSONObject jo = Client.sendCommand("login " + username + " " + password);
         if (jo == null) {
             //read comments in commandToJSONFromServer for what this is
             //returning false will loop consoleLogin
@@ -37,7 +37,7 @@ public class GaxSession {
         }
         System.out.println("Registering...");
         //sends command to server, receives JSON with appropriate response
-        JSONObject jo = GaxClient.sendCommand("register " + username + " " + password);
+        JSONObject jo = Client.sendCommand("register " + username + " " + password);
         if (jo == null) {
             //read comments in commandToJSONFromServer for what this is
             //returning false will loop consoleLogin

@@ -1,16 +1,16 @@
-package GaxClientCMD;
+package GaxClient;
 
 import java.io.*;
 import java.util.ArrayList;
 import org.json.JSONObject;
 
-public class GaxClient {
+public class Client {
 
     //ip and port of the server
     static String ip = "localhost";
     static int port = 42924;
 
-    static GaxSession gs = new GaxSession();
+    static Session gs = new Session();
     static ConsoleUI cui = new ConsoleUI();
     static ClientMemory cm = new ClientMemory();
     static GameDownloader gd = new GameDownloader();
@@ -108,9 +108,9 @@ public class GaxClient {
 
         if (cui.askYNQuestion("Game not installed. Would you like to install it now?")) {
             System.out.println("THIS CODE WAS COPY PASTED FROM CONSOLEUI");
-            boolean abc = GaxClient.gd.downloadGame(gid);
+            boolean abc = Client.gd.downloadGame(gid);
             if (abc) {
-                boolean def = GaxClient.gd.installGame(gid);
+                boolean def = Client.gd.installGame(gid);
             }
         }
 
